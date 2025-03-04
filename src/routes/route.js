@@ -10,6 +10,10 @@ export const routes = [
        name: 'Vehicles',
        component: () => import('../components/views/VehiclesView.vue')
     },
+    { path: '/search', 
+      name:'search',
+      component:() =>import('../components/views/SearchPage.vue')
+     }
    ]
    
    

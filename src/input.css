@@ -17,7 +17,7 @@ h1{
    @apply  text-3xl md:text-4xl md:hidden lg:block xl:text-5xl font-roboto font-bold tracking-normal 
 }
 p{
-    @apply md:hidden lg:block
+    @apply md:hidden lg:block font-[400] font-roboto
 }
 section{
     @apply py-20 md:py-28
