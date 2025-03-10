@@ -1,12 +1,16 @@
 <template>
   <div class="relative h-max w-screen overflow-x-hidden">
-    <nav class="flex items-center shadow-sm w-full justify-between h-16 sm:h-20 fixed z-50 top-0 duration-300 bg-white">
+    <nav
+      v-if="showHeader"
+      class="flex items-center shadow-sm w-full justify-between h-16 sm:h-20 fixed z-50 top-0 duration-300 bg-white"
+    >
       <div class="container flex items-center justify-between">
-        <div>logo</div>
+        <div>
+          <img src="../Images/logo.png" width="32px" height="32px" alt="logo_image">
+        </div>
 
         <div
-          :class="[
-            isMenuOpen ? 'left-0' : 'left-[-100%]',
+          :class="[isMenuOpen ? 'left-0' : 'left-[-100%]', 
             'absolute top-0 min-h-[80vh] w-full bg-white backdrop-blur-sm flex flex-col items-center justify-center gap-8 duration-300 overflow-hidden',
             'lg:static lg:min-h-fit lg:bg-transparent lg:w-auto lg:flex lg:flex-row lg:opacity-100 lg:left-auto',
           ]"
@@ -27,13 +31,15 @@
           </ul>
         </div>
 
-        <div v-if="$route.path === '/search'" class="flex flex-row justify-between items-center p-0 gap-8">
-          <Button content="Se connecter" customClass="bg-white text-black border border-black hover:bg-gray-800 hover:text-white px-2" />
-          <Button content="S'inscrire" customClass="bg-black text-white hover:bg-gray-800" />
-        </div>
-        
-        <div v-else class="flex flex-row items-center p-0 gap-4 flex-wrap md:hidden lg:block">
-          <Button content="Se connecter" customClass="bg-black text-white hover:bg-slate-800 px-2 rounded-md" />
+        <!-- Boutons de connexion / déconnexion -->
+        <div class="flex flex-row items-center gap-2 flex-wrap md:hidden lg:flex">
+          <template v-if="!isAuthenticated">
+            <Button content="Se connecter" customClass="bg-black text-white hover:bg-slate-800 px-2 rounded-md" @click="openLogin" />
+            <Button content="S'inscrire" customClass="bg-white text-black border border-black hover:bg-gray-800 hover:text-white px-2" @click="openRegisterForm" />
+          </template>
+          <template v-else>
+            <Button content="Se déconnecter" customClass="bg-black text-white hover:bg-slate-800 px-2 rounded-md" @click="logout" />
+          </template>
         </div>
 
         <div class="text-xl sm:text-3xl cursor-pointer z-50 lg:hidden" @click="toggleMenu">
@@ -45,10 +51,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRoute } from "vue-router";
-import Button from "./Button.vue";
+import { ref, computed, onMounted,  } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios"; 
+import Button from '../bases/Button.vue';
 
+const router = useRouter();
+const route = useRoute();
+const isMenuOpen = ref(false);
+
+const emits = defineEmits(['updateAuth', 'logout']);
+const props = defineProps({
+  isAuthenticated: Boolean
+})
 const navLinks = ref([
   { text: "Accueil", to: "/" },
   { text: "Véhicules", to: "/vehicles" },
@@ -56,8 +71,32 @@ const navLinks = ref([
   { text: "Contact", to: "/contact" },
 ]);
 
-const isMenuOpen = ref(false);
-const route = useRoute();
+const openRegisterForm = () => {
+  router.push("/registerForm");
+};
+
+const openLogin = () => {
+  router.push("/login");
+};
+
+
+const logout = async () => {
+  try {
+    await axios.post("https://booking.openintech.app/api/logout", {}, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+   
+ 
+    localStorage.removeItem("token");
+    emits('updateAuth', false)
+    emits('logout', true)
+    router.push("/");
+  } catch (error) {
+    console.error("Erreur de déconnexion", error);
+  }
+};
+
+const showHeader = computed(() => !["/login", "/registerForm"].includes(route.path));
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
@@ -68,4 +107,16 @@ const handleClick = () => {
     isMenuOpen.value = false;
   }
 };
+
+onMounted(() => {
+  const token = localStorage.getItem("token");
+  console.log(token)
+
+  if (token) {
+   emits('updateAuth', true)
+  
+  }
+});
+
+
 </script>

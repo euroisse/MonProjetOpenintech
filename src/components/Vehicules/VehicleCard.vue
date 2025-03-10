@@ -15,8 +15,8 @@
           >
             <i :class="service.icon + ' text-2xl md:text-xl text-black'"></i>
           </div>
-          <h3 class="text-lg md:text-md font-semibold mt-4">{{ service.title }}</h3>
-          <p class="text-[#4B5563] mt-3">{{ service.description }}</p>
+          <h3 class="text-lg md:text-md mt-3">{{ service.title }}</h3>
+          <p class=" mt-2">{{ service.description }}</p>
         </div>
       </div>
     </div>
@@ -24,7 +24,10 @@
 </template>
 
 <script setup>
-const services = [
+import { ref } from 'vue';
+
+
+const services = ref( [
   {
     icon: "ri-car-fill",
     title: "Large choix",
@@ -45,18 +48,26 @@ const services = [
     title: "Support 24/7",
     description: "Assistance permanente",
   },
-];
+]);
 </script>
 
 <style scoped>
-h2 {
+h3 {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 600;
+  color:#111827 ;
+}
+h2{
   font-size: 30px;
   line-height: 36px;
   font-weight: 700;
+  
 }
 p {
   font-size: 16px;
   line-height: 24px;
   font-weight: normal;
+color: #4B5563;
 }
 </style>
