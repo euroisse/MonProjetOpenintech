@@ -2,11 +2,11 @@
   <section>
     <div class="items-center gap-3 text-center mb-20">
       <h2 class="text-[#111827] text-[30px] font-roboto font-[700]">
-        Témoignages Clients
+        Témoignages Clients 
       </h2>
     </div>
     <div
-      class="container w-full grid grid-cols-1 md:px-5 gap-6 md:grid-cols-2 lg:grid-cols-3"
+      class="container w-full grid grid-cols-1 gap-6 md:grid-cols-2"
     >
       <div
         v-for="review in reviews"
@@ -22,16 +22,25 @@
           </p>
         </div>
         <div class="flex items-center">
-          <img
-            :src="review.customer.image"
-            :alt="review.customer.name"
-            class="w-12 h-12 rounded-full"
-          />
+          <div
+            v-if="review.customer && review.customer.icon"
+            class="w-12 h-12 bg-[#DBEAFE] flex items-center justify-center rounded-full shadow-md"
+          >
+            <i
+              :class="
+                review.customer.icon +
+                ' text-lg items-center text-center text-gray-700'
+              "
+            ></i>
+          </div>
+          <div v-else class="w-12 h-12 bg-[#DBEAFE] flex items-center justify-center rounded-full shadow-md">
+            <i class="ri-user-line text-lg items-center text-center text-gray-700"></i>
+          </div>
           <div class="ml-2 nameProf">
             <p class="name text-[#111827] font-roboto uppercase">
-              {{ review.customer.name }}
+              {{ review.customer ? review.customer.firstname : 'Unknown' }}
             </p>
-            <p class="prof font-roboto">{{ review.customer.location }}</p>
+            <p class="prof font-roboto">{{ review.customer ? review.customer.product : '' }}</p>
           </div>
         </div>
       </div>
@@ -43,39 +52,37 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
+
+
+
 const reviews = ref([]);
 
 const fetchReviews = async () => {
   try {
-    const response = await axios.get(`https://booking.openintech.app/api/reviews`, {
-      params: {
-        product_id: 22,
-        customer: 1,
-        page: 1,
-        category: "CAR",
-      },
-      headers: {
-        "Content-Type": "application/json",
-        "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
-        "token":  "36|ANNQlsnws6tI2Ei4oLeqR4eheoGz8xRzyLgFjGb09c922402"
-
-      },
-    });
-    reviews.value = response.data;
+    const response = await axios.get(
+      `https://booking.openintech.app/api/reviews`,
+      {
+        params: {
+          page: 1,
+         
+        },
+        headers: {
+          "Content-Type": "application/json",
+          "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
+        },
+      }
+    );
+    reviews.value = response.data.data;
+    console.log(response.data);
   } catch (error) {
     console.error("Erreur lors de la récupération des avis :", error);
   }
 };
 
 onMounted(() => {
- 
-    fetchReviews();
- 
- 
+  fetchReviews();
 });
 </script>
-
-
 
 <style scoped>
 p {
@@ -88,7 +95,6 @@ p {
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-
 }
 .prof {
   font-size: 14px;

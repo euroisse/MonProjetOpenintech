@@ -10,62 +10,59 @@
       </div>
     </div>
 
-    <!-- Formulaire de recherche -->
     <div class="search-form-container container">
       <div class="shadow-lg p-6 bg-white rounded-lg w-full max-w-full mx-auto">
         <div class="grid grid-cols-4 gap-4 text-left items-center w-full">
-          <!-- Lieu de prise en charge -->
           <div class="flex flex-col gap-1">
             <label class="label-style">Lieu de prise en charge</label>
             <div class="relative w-full">
               <span class="icon-style">
                 <i class="ri-map-pin-line"></i>
               </span>
-              <input
-                v-model="searchData.location"
-                type="text"
-                placeholder="Paris, France"
-                class="input-style p-2"
-              />
+              <select v-model="selectedCountry">
+                <option value="">Sélectionner un pays</option>
+                <option v-for="country in countries" :key="country.id" :value="country">
+                  {{ country.name }}
+                </option>
+              </select>
+              <select v-model="selectedCity" :disabled="!selectedCountry">
+                <option value="">Sélectionner une ville</option>
+                <option v-for="city in cities" :key="city.id" :value="city">
+                  {{ city.name }}
+                </option>
+              </select>
             </div>
           </div>
 
-          <!-- Date de début -->
           <div class="flex flex-col gap-1">
             <label class="label-style">Date de début</label>
             <div class="relative w-full">
               <span class="icon-style">
                 <i class="ri-calendar-line"></i>
               </span>
-              <input
-                v-model="searchData.startDate"
-                type="date"
-                class="input-style p-2"
-              />
+              <input v-model="searchData.date" type="date" class="input-style p-2" />
             </div>
           </div>
 
-          <!-- Type de véhicule -->
           <div class="flex flex-col gap-1">
             <label class="label-style">Type de véhicule</label>
             <div class="relative w-full">
               <span class="icon-style">
                 <i class="ri-car-line"></i>
               </span>
-              <select v-model="searchData.vehicleType" class="input-style">
+              <select v-model="searchData.brands" class="input-style">
                 <option value="">Tous</option>
-                <option value="SUV">SUV</option>
-                <option value="Berline">Berline</option>
-                <option value="Sport">Sport</option>
+                <option v-for="brand in brands" :key="brand" :value="brand">
+                  {{ brand }}
+                </option>
               </select>
             </div>
           </div>
 
-          <!-- Bouton de recherche -->
           <div class="flex items-center pt-7">
             <Button
               content="Rechercher"
-              customClass="bg-black text-white hover:bg-slate-800 px-4 rounded-md w-full "
+              customClass="bg-black text-white hover:bg-slate-800 px-4 rounded-md w-full"
               @click="goToVehicleFilter"
             />
           </div>
@@ -76,28 +73,89 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import Button from "../bases/Button.vue";
-import { useRouter } from "vue-router";
+import { onMounted, ref, watch } from 'vue';
+import Button from '../bases/Button.vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const router = useRouter();
-
+const countries = ref([]);
+const cities = ref([]);
+const brands = ref([]);
 const searchData = ref({
-  location: "",
-  startDate: "",
-  vehicleType: "",
+  pickupLocation: '',
+  date: '',
+  brands: '',
 });
-console.log(searchData);
+const selectedCountry = ref(null);
+const selectedCity = ref(null);
+
+onMounted(async () => {
+  await fetchCountries();
+  await fetchVehicleTypes();
+});
+
+const fetchCountries = async () => {
+  const response = await axios.get('https://booking.openintech.app/api/countries', {
+    headers: {
+      'Content-Type': 'application/json',
+      'Shop-Id': '072f100a-9009-4e5c-98a2-007f2f24cf11',
+    },
+  });
+  countries.value = response.data.countries;
+};
+
+const fetchVehicleTypes = async () => {
+  try {
+    const response = await axios.get('https://booking.openintech.app/api/products', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Shop-Id': '072f100a-9009-4e5c-98a2-007f2f24cf11',
+      },
+    });
+    // const uniqueBrands = [...new Set(response.data.vehicles.map(vehicle => vehicle.brand))];
+    // brands.value = uniqueBrands;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des types de véhicules:', error);
+  }
+};
+
+watch(
+  () => selectedCountry.value,
+  async (newCountry) => {
+    if (newCountry) {
+      const response = await axios.get('https://booking.openintech.app/api/cities', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Shop-Id': '072f100a-9009-4e5c-98a2-007f2f24cf11',
+        },
+        params: {
+          countryId: newCountry.id,
+        },
+      });
+      cities.value = response.data.cities;
+   
+    } else {
+      cities.value = [];
+    }
+  }
+);
 
 const goToVehicleFilter = () => {
-  router.push({ path: "/vehicleFilter", query: searchData.value });
+  if (!selectedCountry.value || !selectedCity.value || !searchData.date || !searchData.brands) {
+    alert('Veuillez remplir tous les champs de recherche.');
+    return;
+  }
+  searchData.pickupLocation = `${selectedCity.value.name}, ${selectedCountry.value.name}`;
+  router.push({ path: '/vehicleFilter', query: searchData.value });
 };
 </script>
 
+
+
 <style scoped>
-/* Section avec l'image de fond */
 .search-page {
-  background-image: url("/src/components/Images/voiture3.png");
+  background-image: url('/src/components/Images/voiture3.png');
   background-size: cover;
   background-position: center;
   background-color: black;
@@ -114,7 +172,6 @@ h1 {
   font-weight: 700;
 }
 
-/* Conteneur du formulaire */
 .search-form-container {
   position: absolute;
   bottom: -50px;
@@ -133,7 +190,6 @@ h1 {
   color: #374151;
 }
 
-/* Style des inputs */
 .input-style {
   border: 1px solid #d1d5db;
   width: 100%;
@@ -146,7 +202,7 @@ h1 {
 select {
   padding: 10px;
 }
-/* Icône dans l'input */
+
 .icon-style {
   position: absolute;
   left: 10px;

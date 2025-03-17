@@ -108,6 +108,8 @@ const seConnecter = async () => {
             headers: {
                 "Content-Type": "application/json",
                 "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
+               // "Guest-token":"9f061670-2e2f-4bfa-b47e-65c5dd91164f"
+                
             },
         });
 

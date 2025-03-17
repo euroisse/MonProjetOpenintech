@@ -32,7 +32,7 @@ const utilisateur = ref(null);
 
 const recupererUtilisateur = async () => {
   try {
-    const response = await api.get('/user');
+    const response = await api.get('/me');
     utilisateur.value = response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération des informations :', error);

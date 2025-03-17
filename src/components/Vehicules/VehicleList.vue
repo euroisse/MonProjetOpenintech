@@ -60,6 +60,7 @@ const fetchVehicles = async () => {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
+        "Content-Type": "application/json",
       },
     });
     console.log(response.data);
