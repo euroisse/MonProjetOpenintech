@@ -20,13 +20,20 @@
         <swiper-slide v-for="service in services" :key="service.id">
           <div class="rounded p-6">
             <div class="flex justify-center items-center">
-              <img v-if="service.images.length > 0" :src="service.images[0].links" :alt="service.name" class="max-w-full w-full" />
+              <img
+                v-if="service.images.length > 0"
+                :src="service.images[0].links"
+                :alt="service.name"
+                class="max-w-full w-full"
+              />
             </div>
             <div class="bg-white text-left p-5">
               <h3 class="text-black font-semibold mb-2">{{ service.name }}</h3>
               <p class="text-gray-600">{{ service.description }}</p>
               <div class="mt-3 flex justify-between items-center">
-                <p class="text-lg font-bold">{{ service.price_day }} € / jour</p> 
+                <p class="text-lg font-bold">
+                  {{ service.price_day }} € / jour
+                </p>
               </div>
             </div>
           </div>
@@ -49,15 +56,20 @@ const services = ref();
 
 const fetchServices = async () => {
   try {
-    const response = await axios.get("https://booking.openintech.app/api/products", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.get(
+      "https://booking.openintech.app/api/products",
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
+          "Content-Type": "application/json",
+        },
+      }
+    );
     console.log(response.data);
-    services.value = response.data.data.filter(product => product.category === "HOTEL"); 
+    services.value = response.data.data.filter(
+      (product) => product.category === "HOTEL"
+    );
   } catch (error) {
     console.error("Erreur lors de la récupération des services :", error);
   }

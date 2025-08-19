@@ -631,6 +631,11 @@ video {
   margin-right: auto;
 }
 
+.my-5{
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
 .mb-10{
   margin-bottom: 2.5rem;
 }
@@ -740,6 +745,10 @@ video {
   width: 50%;
 }
 
+.w-1\/4{
+  width: 25%;
+}
+
 .w-12{
   width: 3rem;
 }
@@ -758,6 +767,10 @@ video {
 
 .w-screen{
   width: 100vw;
+}
+
+.max-w-2xl{
+  max-width: 42rem;
 }
 
 .max-w-3xl{
@@ -854,6 +867,10 @@ video {
 
 .gap-8{
   gap: 2rem;
+}
+
+.gap-7{
+  gap: 1.75rem;
 }
 
 .space-y-4 > :not([hidden]) ~ :not([hidden]){
@@ -1495,8 +1512,8 @@ section{
     width: 50%;
   }
 
-  .md\:w-1\/4{
-    width: 25%;
+  .md\:w-2\/4{
+    width: 50%;
   }
 
   .md\:w-3\/4{
@@ -1569,6 +1586,10 @@ section{
     width: auto;
   }
 
+  .lg\:w-1\/4{
+    width: 25%;
+  }
+
   .lg\:grid-cols-2{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1595,6 +1616,10 @@ section{
 }
 
 @media (min-width: 1180px){
+  .xl\:w-1\/4{
+    width: 25%;
+  }
+
   .xl\:grid-cols-4{
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }

@@ -1,7 +1,7 @@
 <template>
   <section class="search-page pt-10 pb-30">
     <div class="container pt-20">
-      <div class="max-w-3xl space-y-4">
+      <div class="max-w-2xl space-y-4">
         <h1 class="font-roboto">Location de voitures premium</h1>
         <p class="text-lg text-[#D1D5DB]">
           Découvrez une sélection de véhicules haut de gamme <br />
@@ -19,13 +19,24 @@
               <span class="icon-style">
                 <i class="ri-map-pin-line"></i>
               </span>
-              <select v-model="selectedCountry">
+              <select
+                v-model="selectedCountry"
+                class="border rounded-md text-black"
+              >
                 <option value="">Sélectionner un pays</option>
-                <option v-for="country in countries" :key="country.id" :value="country">
+                <option
+                  v-for="country in countries"
+                  :key="country.id"
+                  :value="country"
+                >
                   {{ country.name }}
                 </option>
               </select>
-              <select v-model="selectedCity" :disabled="!selectedCountry">
+              <select
+                v-model="selectedCity"
+                :disabled="!selectedCountry"
+                class="border rounded-md text-black"
+              >
                 <option value="">Sélectionner une ville</option>
                 <option v-for="city in cities" :key="city.id" :value="city">
                   {{ city.name }}
@@ -40,7 +51,11 @@
               <span class="icon-style">
                 <i class="ri-calendar-line"></i>
               </span>
-              <input v-model="searchData.date" type="date" class="input-style p-2" />
+              <input
+                v-model="searchData.date"
+                type="date"
+                class="input-style p-2"
+              />
             </div>
           </div>
 
@@ -53,7 +68,7 @@
               <select v-model="searchData.brands" class="input-style">
                 <option value="">Tous</option>
                 <option v-for="brand in brands" :key="brand" :value="brand">
-                  {{ brand }}
+                  {{ brand.name }}
                 </option>
               </select>
             </div>
@@ -73,19 +88,19 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import Button from '../bases/Button.vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { onMounted, ref, watch } from "vue";
+import Button from "../bases/Button.vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 const countries = ref([]);
 const cities = ref([]);
 const brands = ref([]);
 const searchData = ref({
-  pickupLocation: '',
-  date: '',
-  brands: '',
+  pickupLocation: "",
+  date: "",
+  brands: "",
 });
 const selectedCountry = ref(null);
 const selectedCity = ref(null);
@@ -96,66 +111,72 @@ onMounted(async () => {
 });
 
 const fetchCountries = async () => {
-  const response = await axios.get('https://booking.openintech.app/api/countries', {
-    headers: {
-      'Content-Type': 'application/json',
-      'Shop-Id': '072f100a-9009-4e5c-98a2-007f2f24cf11',
-    },
-  });
-  countries.value = response.data.countries;
+  try {
+    const response = await axios.get("https://booking.openintech.app/api/countries", {
+      headers: {
+        "Content-Type": "application/json",
+        "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
+      },
+    });
+    countries.value = response.data.countries;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des pays:", error);
+  }
 };
+
+const fetchCities = async (countryId) => {
+  if (!countryId){
+    cities.value = []
+    return;
+  
+  } 
+  try {
+    const response = await axios.get(`https://booking.openintech.app/api/cities?country_id=${countryId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
+      },
+      params: { country: countryId },
+    });
+    cities.value = response.data.cities || [];
+  } catch (error) {
+    console.error("Erreur lors de la récupération des villes:", error);
+  }
+};
+
+watch(selectedCountry, (newCountry) => {
+  selectedCity.value = null;
+  fetchCities(newCountry?.id);
+});
 
 const fetchVehicleTypes = async () => {
   try {
-    const response = await axios.get('https://booking.openintech.app/api/products', {
+    const response = await axios.get("https://booking.openintech.app/api/brands", {
       headers: {
-        'Content-Type': 'application/json',
-        'Shop-Id': '072f100a-9009-4e5c-98a2-007f2f24cf11',
+        "Content-Type": "application/json",
+        "Shop-Id": "072f100a-9009-4e5c-98a2-007f2f24cf11",
       },
     });
-    // const uniqueBrands = [...new Set(response.data.vehicles.map(vehicle => vehicle.brand))];
-    // brands.value = uniqueBrands;
+    brands.value = response.data.brands;
   } catch (error) {
-    console.error('Erreur lors de la récupération des types de véhicules:', error);
+    console.error("Erreur lors de la récupération des marques de véhicules:", error);
   }
 };
 
-watch(
-  () => selectedCountry.value,
-  async (newCountry) => {
-    if (newCountry) {
-      const response = await axios.get('https://booking.openintech.app/api/cities', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Shop-Id': '072f100a-9009-4e5c-98a2-007f2f24cf11',
-        },
-        params: {
-          countryId: newCountry.id,
-        },
-      });
-      cities.value = response.data.cities;
-   
-    } else {
-      cities.value = [];
-    }
-  }
-);
-
 const goToVehicleFilter = () => {
-  if (!selectedCountry.value || !selectedCity.value || !searchData.date || !searchData.brands) {
-    alert('Veuillez remplir tous les champs de recherche.');
+  if (!selectedCountry.value || !selectedCity.value || !searchData.value.date) {
+    alert("Veuillez remplir tous les champs obligatoires.");
     return;
   }
-  searchData.pickupLocation = `${selectedCity.value.name}, ${selectedCountry.value.name}`;
-  router.push({ path: '/vehicleFilter', query: searchData.value });
+  searchData.value.pickupLocation = `${selectedCity.value.name}, ${selectedCountry.value.name}`;
+  router.push({ path: "/vehicleFilter", query: searchData.value });
 };
 </script>
 
 
-
 <style scoped>
 .search-page {
-  background-image: url('/src/components/Images/voiture3.png');
+  background-image: url("/src/components/Images/voiture3.png");
   background-size: cover;
   background-position: center;
   background-color: black;
